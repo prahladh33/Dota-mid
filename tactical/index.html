@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090d13">
+<title>Dota Tactical — 7.41f</title>
+<style>
+:root{color-scheme:dark;--bg:#090d13;--panel:#111923;--panel2:#172330;--line:#263646;--text:#edf3fa;--muted:#8293a6;--gold:#e7b968;--green:#68d6a0;--red:#ff7279;--blue:#82bfff;--r:16px}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -18%,#203247 0,transparent 45%),var(--bg);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,Segoe UI,sans-serif;min-height:100vh}
+button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#192635;border-radius:10px;padding:9px 12px;transition:transform .18s,border-color .18s,background .18s}button:hover{transform:translateY(-1px);border-color:#bd9858;background:#25374a}button:active{transform:scale(.97)}input,select{background:#0b121b;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px;outline:none}input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px #e7b96820}
+header{height:70px;border-bottom:1px solid #ffffff12;background:#090e16d9;backdrop-filter:blur(18px);display:flex;align-items:center;padding:0 clamp(14px,4vw,48px);gap:14px;position:sticky;top:0;z-index:20}
+.logo{font-weight:900;letter-spacing:2px;color:var(--gold);font-size:14px}.logo span{color:#f5f7fb}.patch{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:5px 8px}.right{margin-left:auto;display:flex;gap:8px;align-items:center}.iconbtn{width:38px;height:38px;padding:0;display:grid;place-items:center;font-size:16px}
+.app{max-width:1320px;margin:auto;padding:26px clamp(12px,3vw,34px) 50px}.intro{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:20px}.eyebrow{color:var(--gold);font-size:10px;letter-spacing:2px;font-weight:800}.intro h1{font-size:clamp(25px,4vw,38px);line-height:1.1;margin:5px 0 6px;letter-spacing:-1.3px}.intro p{color:var(--muted);margin:0;font-size:13px}.data{font-size:11px;color:var(--muted);padding:8px 11px;border:1px solid var(--line);border-radius:99px;white-space:nowrap}.data:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin:0 7px 1px 0}.data.ok:before{background:var(--green)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:18px}.main{min-width:0}.side{display:flex;flex-direction:column;gap:13px}
+.panel{background:linear-gradient(145deg,#141f2b,#101720);border:1px solid #ffffff10;border-radius:var(--r);padding:17px;box-shadow:0 15px 45px #0003;animation:rise .45s both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 #e7b96800}50%{box-shadow:0 0 22px 2px #e7b96820}}
+@keyframes pop{0%{transform:scale(.94);opacity:.5}100%{transform:scale(1);opacity:1}}
+.panelhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}.panelhead h2{font-size:12px;letter-spacing:1.4px;text-transform:uppercase;margin:0;color:#c6d2df}.muted{color:var(--muted)}.small{font-size:11px}
+.roster{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+.slot{min-height:116px;border:1px solid #314254;border-radius:13px;background:linear-gradient(150deg,#0e1721,#111e2a);position:relative;overflow:hidden;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.slot.empty{border-style:dashed;color:#7d8fa3}.slot.empty .plus{font-size:25px;color:#52677e;font-weight:300}.slot img{width:100%;height:77px;object-fit:cover;opacity:.92;transition:transform .35s}.slot:not(.empty):after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(transparent,#0a1019)}.slot .hero-name{z-index:1;font-size:11px;font-weight:700;margin-top:-18px;text-shadow:0 2px 5px #000}.slot.active{border-color:var(--gold);animation:glow 3s infinite}.slot .x{position:absolute;z-index:3;top:6px;right:6px;width:22px;height:22px;padding:0;border-radius:50%;font-size:12px;background:#080d15b8;border:0;display:grid;place-items:center;cursor:pointer}.slot .x:hover{background:#3c4d60}.slot:hover img{transform:scale(1.07)}
+.toolbar{display:flex;gap:8px;align-items:center;margin-top:12px}.toolbar input{flex:1;min-width:100px}.primary{background:linear-gradient(135deg,#d7a64e,#f0cb81);color:#17120a;border:0;font-weight:800}.primary:hover{background:linear-gradient(135deg,#edbd67,#ffdc9a)}
+.herohead{display:flex;align-items:center;gap:13px}.herohead img{width:74px;height:54px;object-fit:cover;border-radius:9px;border:1px solid #ffffff18}.herohead h2{font-size:19px;margin:0 0 3px}.herohead .sub{color:var(--muted);font-size:11px}
+.heroactions{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}.quiet{background:#101a25}.section{margin-top:18px}.sectiontitle{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.sectiontitle h3{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:#aebdcb;margin:0}
+.cooldowns{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:9px}
+.cd{background:#0b141e;border:1px solid #263748;border-radius:12px;padding:10px;min-height:132px;display:flex;flex-direction:column;gap:7px;transition:border-color .2s,transform .2s;animation:pop .25s both}.cd:hover{transform:translateY(-2px);border-color:#637e99}.cd.ready{border-color:#285b48}.cd.passiveult{border-color:#69548a;background:linear-gradient(145deg,#1b1728,#101720)}.cd.cooling{border-color:#713b43;background:linear-gradient(150deg,#21171c,#111923)}
+.cdtop{display:flex;align-items:center;justify-content:space-between}.cdtop img{width:42px;height:32px;object-fit:cover;border-radius:5px}.tag{font-size:9px;letter-spacing:.7px;border-radius:99px;padding:3px 6px;background:#293a4d;color:#b9cde1}.tag.ult{background:#3b2b50;color:#d5b9ff}.tag.item{background:#244337;color:#a7e8c5}
+.cdname{font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.count{font-size:23px;font-weight:850;letter-spacing:-.5px;font-variant-numeric:tabular-nums;color:var(--red)}.readytxt{font-size:14px;color:var(--green);font-weight:800}.cdfoot{display:flex;gap:5px;margin-top:auto}.cdfoot button{font-size:10px;padding:5px 7px;flex:1}.mini{background:transparent}
+.inventory{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.inv{position:relative}.custom-item-icon{display:grid;place-items:center;width:100%;height:100%;font-size:12px;font-weight:900;letter-spacing:.5px;color:#f0c66f;background:linear-gradient(135deg,#27394c,#111b27);}.inv-cooldown{position:absolute;left:2px;right:2px;bottom:2px;padding:2px 1px;border-radius:4px;background:#07111ddd;color:#70d6aa;font-size:9px;font-weight:800;line-height:1.2;text-align:center;pointer-events:none}.inv.cooling .inv-cooldown{color:#ffcc72;background:#17110ddd}.inv{height:47px;border:1px dashed #42566b;border-radius:8px;background:#0b131c;display:grid;place-items:center;padding:0;overflow:hidden}.inv img{width:100%;height:100%;object-fit:cover}.inv.active{border:2px solid var(--gold);box-shadow:0 0 0 2px #e7b96822}
+.sidecard{background:linear-gradient(145deg,#141f2b,#101720);border:1px solid #ffffff10;border-radius:var(--r);padding:15px;box-shadow:0 12px 35px #0003}.sidecard h3{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:#bdcbd8;margin:0 0 12px}
+.clock{font-size:35px;font-weight:850;letter-spacing:-1px;font-variant-numeric:tabular-nums}.clockrow{display:flex;align-items:center;justify-content:space-between}.clockstate{font-size:10px;color:var(--green);letter-spacing:1px}.sidebuttons{display:flex;gap:6px;margin-top:10px}.sidebuttons button{flex:1;font-size:11px;padding:8px 5px}
+.objective{padding:10px;border-radius:10px;background:#0b141e;border:1px solid #253647;margin-bottom:8px}.objective strong{display:block;font-size:14px;margin:3px 0}.objective .muted{font-size:10px}
+.objectiveactions{display:flex;gap:6px;flex-wrap:wrap}.objectiveactions button{flex:1;font-size:10px;padding:7px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:7px}.metric{padding:10px;border-radius:10px;background:#0b141e;border:1px solid #253647}.metric strong{display:block;font-size:18px}
+.searchgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:7px;max-height:300px;overflow:auto;margin-top:10px}.pick{font-size:10px;padding:6px;background:#0b141e}.pick img{width:100%;height:48px;object-fit:cover;border-radius:5px;display:block;margin-bottom:4px}
+.drawer{position:fixed;inset:0;background:#02060bd9;backdrop-filter:blur(7px);z-index:40;display:none;align-items:center;justify-content:center;padding:15px}.drawer.open{display:flex}.dialog{width:min(620px,100%);max-height:82vh;overflow:auto;background:#121d29;border:1px solid #405368;border-radius:17px;padding:18px;box-shadow:0 25px 90px #000a;animation:pop .22s}.dialoghead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.dialoghead h2{font-size:15px;margin:0}
+.tabs{display:flex;gap:6px;margin-bottom:13px}.tab{font-size:11px;padding:7px 10px;background:#0d1620}.tab.active{background:#4b3a20;border-color:var(--gold);color:#ffe0a5}
+.history{display:grid;gap:6px}.event{font-size:11px;padding:8px 10px;background:#0b141e;border-radius:8px;color:#c4d0dc}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#26394c;border:1px solid #617b95;padding:9px 14px;border-radius:10px;z-index:80;display:none;box-shadow:0 8px 30px #0008}
+.note{font-size:10px;color:var(--muted);line-height:1.5}.hidden{display:none!important}
+@media(max-width:920px){.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.sidecard:last-child{grid-column:1/-1}}
+@media(max-width:650px){header{height:60px}.patch{display:none}.app{padding-top:18px}.intro{align-items:start;flex-direction:column}.roster{gap:5px}.slot{min-height:83px}.slot img{height:55px}.slot .hero-name{font-size:9px}.side{display:flex}.herohead{align-items:flex-start}.heroactions{width:100%;margin:8px 0 0}.herohead{flex-wrap:wrap}.cooldowns{grid-template-columns:repeat(2,minmax(0,1fr))}.cd{min-height:125px}.toolbar{flex-wrap:wrap}.toolbar input{flex-basis:100%}}
+</style></head>
+<body>
+<header><div class="logo">DOTA <span>TACTICAL</span></div><span class="patch">PATCH TARGET · 7.41f</span><div class="right"><span class="data" id="dataStatus">Connecting game data</span><button class="iconbtn" id="refresh" title="Refresh data">↻</button><button class="iconbtn" id="export" title="Export backup">⇧</button><button class="iconbtn" id="settings" title="Settings">⚙</button></div></header>
+<div class="app">
+ <div class="intro"><div><div class="eyebrow">MATCH COMPANION / ENEMY INTELLIGENCE</div><h1>Read the fight before it happens.</h1><p>A clean tactical view of enemy cooldowns, inventory and objectives.</p></div><div class="data" id="patchInfo">Manual companion · not connected to live match</div></div>
+ <div class="layout"><main class="main">
+  <section class="panel">
+   <div class="panelhead"><h2>Enemy lineup <span class="muted" id="teamCount">0/5</span></h2><button class="quiet small" id="presets">Presets ↗</button></div>
+   <div class="roster" id="roster"></div>
+   <div class="toolbar"><input id="heroSearch" placeholder="Find a hero to add…"><button class="primary" id="browse">Choose hero</button></div>
+  </section>
+  <section class="panel" id="heroPanel"><div class="muted">Select an enemy hero to start tracking.</div></section>
+  <section class="panel">
+   <div class="panelhead"><h2>Teamfight watchlist</h2><span class="small muted">Ultimates + key saves</span></div>
+   <div id="watchlist" class="cooldowns"><div class="muted small">Your tracked threats will appear here.</div></div>
+  </section>
+  <section class="panel hidden" id="historyPanel"><div class="panelhead"><h2>Recent cooldown events</h2><button id="clearHistory" class="small">Clear</button></div><div id="history" class="history"></div></section>
+ </main>
+ <aside class="side">
+  <section class="sidecard"><h3>Match clock</h3><div class="clockrow"><div class="clock" id="clock">00:00</div><span class="clockstate" id="clockState">PAUSED</span></div><div class="sidebuttons"><button class="primary" id="toggleClock">Start / pause</button><button id="resetClock">Reset</button></div><div class="toolbar"><input id="setClock" type="number" min="0" placeholder="Set minute"><button id="applyClock">Set</button></div></section>
+  <section class="sidecard"><h3>Objectives</h3><div class="objective"><div class="muted">ROSHAN · 8–11 MIN WINDOW</div><strong id="rosh">Not tracked</strong><div class="muted" id="aegis">Aegis timer not started</div><div class="objectiveactions" style="margin-top:8px"><button id="roshKill">Roshan killed</button><button id="roshReset">Reset Roshan</button></div><div class="objectiveactions" style="margin-top:6px"><button id="aegisPicked">Aegis picked up</button><button id="aegisReset">Reset Aegis</button></div></div><div class="objective"><div class="muted">TORMENTOR</div><strong id="tor">Not tracked</strong><div class="muted" id="torDetail">Record a kill to start.</div><div class="objectiveactions" style="margin-top:8px"><button id="torKill">Tormentor killed</button><button id="torReset">Reset</button></div></div></section>
+  <section class="sidecard"><h3>Quick controls</h3><div class="metrics"><div class="metric"><span class="muted small">TRACKED</span><strong id="tracked">0</strong><span class="muted small">enemy heroes</span></div><div class="metric"><span class="muted small">COOLDOWNS</span><strong id="cooling">0</strong><span class="muted small">currently running</span></div></div><div class="sidebuttons"><button id="undo">Undo last</button><button id="sound">Sound off</button><button id="toggleHistory">History</button></div><p class="note" style="margin-top:10px">Hotkeys: 1–5 select hero · Space start/pause · U undo · Esc close.</p></section>
+ </aside></div>
+</div>
+<div class="drawer" id="drawer"><div class="dialog"><div class="dialoghead"><h2 id="dialogTitle">Choose hero</h2><button id="close">✕</button></div><div id="dialogBody"></div></div></div><div class="toast" id="toast"></div>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+const CDN='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/';
+const PATCH='7.41f';
+const HERO_NAMES={antimage:'Anti-Mage',rattletrap:'Clockwerk',doom_bringer:'Doom',furion:"Nature's Prophet",wisp:'Io',zuus:'Zeus',necrolyte:'Necrophos',nevermore:'Shadow Fiend',queenofpain:'Queen of Pain',skeleton_king:'Wraith King',abyssal_underlord:'Underlord',vengefulspirit:'Vengeful Spirit',windrunner:'Windranger',obsidian_destroyer:'Outworld Destroyer',magnataur:'Magnus',shredder:'Timbersaw',life_stealer:'Lifestealer',lycan:'Lycan',centaur:'Centaur Warrunner',treant:'Treant Protector',keeper_of_the_light:'Keeper of the Light'};
+const FALLBACK_HEROES=('abaddon alchemist ancient_apparition antimage arc_warden axe bane batrider beastmaster bloodseeker bounty_hunter brewmaster bristleback broodmother centaur chaos_knight chen clinkz rattletrap crystal_maiden dark_seer dark_willow dawnbreaker dazzle death_prophet disruptor doom_bringer dragon_knight drow_ranger earth_spirit earthshaker elder_titan ember_spirit enchantress enigma faceless_void grimstroke gyrocopter hoodwink huskar invoker wisp jakiro juggernaut keeper_of_the_light kez kunkka legion_commander leshrac lich life_stealer lina lion lone_druid luna lycan magnataur marci mars medusa meepo mirana monkey_king morphling muerta naga_siren furion necrolyte night_stalker nyx_assassin ogre_magi omniknight oracle obsidian_destroyer pangolier phantom_assassin phantom_lancer phoenix primal_beast puck pudge pugna queenofpain razor riki ringmaster rubick sand_king shadow_demon nevermore shadow_shaman silencer skywrath_mage slardar slark snapfire sniper spectre spirit_breaker storm_spirit sven techies templar_assassin terrorblade tidehunter shredder tinker tiny treant troll_warlord tusk abyssal_underlord undying ursa vengefulspirit venomancer viper visage void_spirit warlock weaver windrunner winter_wyvern witch_doctor skeleton_king zuus largo').split(' ');
+const ULTIMATE_NAMES=new Set(([
+ 'Chaotic Offering','Black Hole','Exorcism','Ravage','Haunt','Flesh Golem','Chronosphere',"Thundergod's Wrath",'Dark Ascension','Omnislash','Reincarnation','Doom','Global Silence',"Sanity's Eclipse",'Primal Split','Supernova','Reverse Polarity','Echo Slam','Hand of God','Eclipse',"Fiend's Grip",'Moonlight Shadow','Requiem of Souls','Epicenter',"God's Strength",'Mass Serpent Ward',"Reaper's Scythe",'Elder Dragon Form','Wall of Replica','Song of the Siren','Summon Familiars',"Fiend's Gate",'Mortimer Kisses','Freezing Field','Overgrowth','Stone Gaze','Stampede','Earth Splitter','Arena Of Blood','Solar Guardian','Wrath of Nature','Shapeshift','Death Ward','Sonic Wave','Noxious Plague','Guardian Angel','Magnetize',"Winter's Curse", "Wukong's Command",'Terrorize','Rolling Thunder','Dream Coil','Phantasm','Spirit Form','Mana Void','Culling Blade','Ghostship','Macropyre','Static Storm','Relocate','Battle Trance','Wheel of Wonder','Rupture','Borrowed Time','Eye of the Storm','Chain Frost','Primal Roar','Flaming Lasso','Chemical Rage','Demonic Purge','Vendetta','False Promise','Soulbind','Unleash','Morph','Call Down','Laguna Blade','Nothl Projection','Infest','True Form','Duel','Tempest Double','Sharpshooter','Pierce the Veil','Time Lapse','Ice Blast','Sunder','Nether Strike','Pulverize','Nether Swap','Focus Fire','Finger of Death','Viper Strike','Hookshot','Enrage','Shadow Dance','Bedlam','Raptor Dance','Dismember','Skeleton Walk','Mystic Flare','Life Break','Assassinate','Walrus PUNCH!','Chakram','Life Drain','Spawn Spiderlings','Invoke','Corrosive Haze','Psionic Trap','Rearm','Track','Spell Steal','Amphibian Rhapsody','Pulse Nova','Fire Remnant','Marksmanship','Juxtapose','Ball Lightning','Grow','Cloak and Dagger','Coup de Grace','Untouchable','Divided We Stand','Multicast','Warpath','Proximity Mines','Astral Step'
+]).map(x=>normalizeName(x)));
+const DEFENSIVE_ITEMS=new Set(['black_king_bar','aeon_disk','lotus_orb','linkens_sphere','manta','ghost','cyclone','sheepstick']);
+const now=()=>Date.now();
+function normalizeName(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'')}
+function load(key,fallback){try{const raw=localStorage.getItem(key);return raw===null?fallback:JSON.parse(raw)}catch(e){console.warn('Could not read saved value:',key,e);return fallback}}
+function toast(message){const node=$('toast');if(!node)return;node.textContent=message;node.style.display='block';clearTimeout(toast.timer);toast.timer=setTimeout(()=>{node.style.display='none'},2200)}
+function finiteNumber(value,fallback=0){const n=Number(value);return Number.isFinite(n)?n:fallback}
+function normalizeCooldowns(raw){
+ let values=[];
+ if(Array.isArray(raw)) values=raw.flat(Infinity);
+ else if(typeof raw==='number') values=[raw];
+ else if(typeof raw==='string') values=raw.match(/-?\d+(?:\.\d+)?/g)||[];
+ return values.map(v=>Number(v)).filter(v=>Number.isFinite(v)&&v>=0);
+}
+function sanitizeHero(input){
+ if(!input||typeof input!=='object'||typeof input.key!=='string'||!/^[a-z0-9_]+$/i.test(input.key))return null;
+ const items=(Array.isArray(input.items)?input.items:[]).filter(x=>x&&typeof x==='object'&&typeof x.key==='string').map(x=>({
+  kind:x.kind==='item'?'item':'ability',key:String(x.key),name:String(x.name||x.key),baseCd:Math.max(.1,finiteNumber(x.baseCd,1)),levels:Array.isArray(x.levels)?x.levels.map(v=>finiteNumber(v,0)).filter(v=>v>=0):[],started:Math.max(0,finiteNumber(x.started,0)),duration:Math.max(0,finiteNumber(x.duration,0)),ult:!!x.ult
+ }));
+ const inventory=Array.isArray(input.inventory)?input.inventory.slice(0,6).map(v=>typeof v==='string'&&/^[a-z0-9_]+$/i.test(v)?v:null):[];
+ const rawInventoryCooldowns=Array.isArray(input.inventoryCooldowns)?input.inventoryCooldowns:[];
+ const inventoryCooldowns=Array.from({length:6},(_,i)=>{const c=rawInventoryCooldowns[i];return c&&typeof c==='object'?{baseCd:Math.max(0,finiteNumber(c.baseCd,0)),started:Math.max(0,finiteNumber(c.started,0)),duration:Math.max(0,finiteNumber(c.duration,0))}:{baseCd:0,started:0,duration:0}});
+ const rawInventoryCustom=Array.isArray(input.inventoryCustom)?input.inventoryCustom:[];
+ const inventoryCustom=Array.from({length:6},(_,i)=>{const c=rawInventoryCustom[i];return c&&typeof c==='object'?{name:String(c.name||'Custom item').slice(0,60),baseCd:Math.max(0,finiteNumber(c.baseCd,0))}:null});
+ return {key:input.key,items,inventory:Array.from({length:6},(_,i)=>inventory[i]||null),inventoryCooldowns,inventoryCustom,cdr:Math.max(0,Math.min(80,finiteNumber(input.cdr,0))),loaded:!!input.loaded,abilityDataPatch:String(input.abilityDataPatch||'')};
+}
+function normalizeCachedData(raw){
+ if(!raw||typeof raw!=='object')return {loaded:false,patch:'unknown',ha:{},abilities:{},items:{},heroList:[],heroNames:{}};
+ return {loaded:!!(raw.loaded&&raw.ha&&raw.abilities&&raw.items),patch:String(raw.patch||'unknown'),ha:raw.ha&&typeof raw.ha==='object'?raw.ha:{},abilities:raw.abilities&&typeof raw.abilities==='object'?raw.abilities:{},items:raw.items&&typeof raw.items==='object'?raw.items:{},heroList:Array.isArray(raw.heroList)?raw.heroList:[],heroNames:raw.heroNames&&typeof raw.heroNames==='object'?raw.heroNames:{}};
+}
+const cachedData=normalizeCachedData(load('dt2_data',null));
+const rawTeam=load('dt2_team',[]);
+const state={
+ team:(Array.isArray(rawTeam)?rawTeam:[]).map(sanitizeHero).filter(Boolean).slice(0,5),
+ selected:Math.max(0,finiteNumber(load('dt2_sel',0),0)),
+ history:Array.isArray(load('dt2_hist',[]))?load('dt2_hist',[]):[],
+ presets:load('dt2_presets',{})&&typeof load('dt2_presets',{})==='object'?load('dt2_presets',{}):{},
+ clock:load('dt2_clock',{elapsed:0,running:false,stamp:0}),
+ rosh:Math.max(0,finiteNumber(load('dt2_rosh',0),0)),
+ tor:Math.max(0,finiteNumber(load('dt2_tor',0),0)),
+ aegis:Math.max(0,finiteNumber(load('dt2_aegis',0),0)),
+ sound:!!load('dt2_sound',false),
+ data:cachedData,undo:[]
+};
+if(!state.clock||typeof state.clock!=='object')state.clock={elapsed:0,running:false,stamp:0};
+state.clock={elapsed:Math.max(0,finiteNumber(state.clock.elapsed,0)),running:!!state.clock.running,stamp:Math.max(0,finiteNumber(state.clock.stamp,0))};
+state.selected=Math.min(state.selected,Math.max(0,state.team.length-1));
+function save(){
+ try{
+  const values={dt2_team:state.team,dt2_sel:state.selected,dt2_hist:state.history,dt2_presets:state.presets,dt2_clock:state.clock,dt2_rosh:state.rosh,dt2_tor:state.tor,dt2_aegis:state.aegis,dt2_sound:state.sound};
+  Object.entries(values).forEach(([k,v])=>localStorage.setItem(k,JSON.stringify(v)));
+ }catch(e){console.error('Save failed',e);toast('Could not save — browser storage may be full or blocked.')}
+}
+function snap(){
+ try{state.undo.push(JSON.stringify({team:state.team,selected:state.selected,history:state.history,presets:state.presets,clock:state.clock,rosh:state.rosh,tor:state.tor,aegis:state.aegis,sound:state.sound}));if(state.undo.length>30)state.undo.shift()}catch(e){console.warn('Undo snapshot skipped',e)}
+}
+function restoreSnapshot(snapshot){state.team=(snapshot.team||[]).map(sanitizeHero).filter(Boolean).slice(0,5);state.selected=Math.max(0,Math.min(finiteNumber(snapshot.selected,0),Math.max(0,state.team.length-1)));state.history=Array.isArray(snapshot.history)?snapshot.history:[];state.presets=snapshot.presets&&typeof snapshot.presets==='object'?snapshot.presets:{};state.clock=snapshot.clock||{elapsed:0,running:false,stamp:0};state.rosh=Math.max(0,finiteNumber(snapshot.rosh,0));state.tor=Math.max(0,finiteNumber(snapshot.tor,0));state.aegis=Math.max(0,finiteNumber(snapshot.aegis,0));state.sound=!!snapshot.sound;}
+function name(key){return state.data.heroNames?.[key]||HERO_NAMES[key]||String(key||'Unknown').split('_').map(x=>x.charAt(0).toUpperCase()+x.slice(1)).join(' ')}
+function fmt(seconds){const n=Math.max(0,Math.ceil(finiteNumber(seconds,0)));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0')}
+function el(tag,className='',text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=String(text);return node}
+function img(src,alt){const node=el('img');node.src=src;node.alt=alt||'';node.loading='lazy';node.onerror=()=>{node.style.visibility='hidden'};return node}
+function heroKeys(){return state.data.heroList.length?state.data.heroList:FALLBACK_HEROES}
+async function get(url){const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status+' for '+url);return response.json()}
+function parseHeroList(rows){
+ const names={},keys=[];
+ const values=Array.isArray(rows)?rows:Object.values(rows||{});
+ values.forEach((row,index)=>{
+  if(!row||typeof row!=='object')return;
+  let raw=row.name||row.hero_name||'';
+  if(!raw&&typeof row.key==='string')raw=row.key;
+  if(!raw&&typeof row.localized_name==='string')raw=row.localized_name.toLowerCase().replace(/[^a-z0-9]+/g,'_');
+  const key=String(raw).replace(/^npc_dota_hero_/,'');
+  if(!key||! /^[a-z0-9_]+$/i.test(key))return;
+  names[key]=row.localized_name||HERO_NAMES[key]||nameFallback(key);
+  if(!keys.includes(key))keys.push(key);
+ });
+ if(!keys.length)return {keys:[],names:{}};
+ keys.sort((a,b)=>names[a].localeCompare(names[b]));
+ return {keys,names};
+}
+function nameFallback(key){return String(key||'').split('_').map(x=>x.charAt(0).toUpperCase()+x.slice(1)).join(' ')}
+function buildAbilityData(source){
+ const result={};
+ Object.entries(source||{}).forEach(([key,value])=>{
+  if(!value||typeof value!=='object')return;
+  const cooldowns=normalizeCooldowns(value.cd).filter(n=>n>0);
+  if(!cooldowns.length)return;
+  const displayName=String(value.dname||value.name||key);
+  result[key]={name:displayName,cd:cooldowns,ult:ULTIMATE_NAMES.has(normalizeName(displayName))};
+ });
+ return result;
+}
+function buildItemData(source){
+ const result={};
+ Object.entries(source||{}).forEach(([key,value])=>{
+  if(!value||typeof value!=='object'||!value.dname||key.startsWith('recipe_'))return;
+  const cooldowns=normalizeCooldowns(value.cd).filter(n=>n>0);
+  if(!cooldowns.length)return;
+  result[key]={name:String(value.dname),cd:cooldowns[0]};
+ });
+ return result;
+}
+let dataLoading=false;
+async function fetchData(){
+ if(dataLoading)return;
+ dataLoading=true;$('dataStatus').textContent='Loading game data';$('dataStatus').classList.remove('ok');
+ try{
+  const [patchRows,heroRows,heroAbilityRows,abilityRows,itemRows]=await Promise.all([
+   'patch','heroes','hero_abilities','abilities','items'
+  ].map(part=>get('https://api.opendota.com/api/constants/'+part)));
+  const patches=Array.isArray(patchRows)?patchRows:Object.values(patchRows||{});
+  patches.sort((a,b)=>finiteNumber(a?.id,0)-finiteNumber(b?.id,0));
+  const heroInfo=parseHeroList(heroRows);
+  const ha={};
+  Object.entries(heroAbilityRows||{}).forEach(([rawKey,value])=>{
+   const key=rawKey.replace('npc_dota_hero_','');
+   const list=Array.isArray(value?.abilities)?value.abilities:[];
+   ha[key]=list.map(x=>typeof x==='string'?x:(x?.name||x?.ability||'')).filter(Boolean);
+  });
+  const data={loaded:true,patch:String(patches.at(-1)?.name||PATCH),ha,abilities:buildAbilityData(abilityRows),items:buildItemData(itemRows),heroList:heroInfo.keys,heroNames:heroInfo.names};
+  if(!Object.keys(data.abilities).length||!Object.keys(data.items).length||!Object.keys(data.ha).length)throw Error('Game data response was incomplete');
+  state.data=data;
+  try{localStorage.setItem('dt2_data',JSON.stringify(data))}catch(e){console.warn('Game data cache was not saved',e)}
+  $('dataStatus').textContent='Data · '+data.patch;
+  $('dataStatus').classList.toggle('ok',data.patch===PATCH);
+  $('patchInfo').textContent='Manual companion · data '+data.patch+' · not connected to live match';
+  render();toast('Game data refreshed');
+ }catch(error){
+  console.error('Game data load failed',error);
+  if(state.data.loaded){$('dataStatus').textContent='Cached data · '+state.data.patch;$('dataStatus').classList.add('ok');$('patchInfo').textContent='Manual companion · cached data '+state.data.patch+' · not connected to live match';render()}
+  else{$('dataStatus').textContent='Manual mode';$('patchInfo').textContent='Manual companion · game data unavailable';toast('Could not load game data. Check connection and retry.')}
+ }finally{dataLoading=false}
+}
+function getAbilities(heroKey){
+ const raw=state.data.ha?.[heroKey]||[];
+ return raw.map(key=>{
+  const data=state.data.abilities?.[key];
+  if(!data)return null;
+  const levels=Array.isArray(data.cd)?data.cd:normalizeCooldowns(data.cd);
+  const usable=levels.filter(v=>v>0);
+  if(!usable.length)return null;
+  return {kind:'ability',key,name:data.name||key,cd:usable[0],levels:usable,ult:ULTIMATE_NAMES.has(normalizeName(data.name))};
+ }).filter(Boolean);
+}
+function ensureInventory(hero){if(!Array.isArray(hero.inventory))hero.inventory=[];hero.inventory=Array.from({length:6},(_,i)=>hero.inventory[i]||null)}
+function initializeHeroAbilities(hero){
+ if(!state.data.loaded)return;
+ if(!Array.isArray(hero.items))hero.items=[];
+ const patchChanged=hero.abilityDataPatch!==state.data.patch;
+ const hasAbility=hero.items.some(item=>item.kind==='ability');
+ if(!hero.loaded||patchChanged||!hasAbility){
+  const existing=new Set(hero.items.filter(item=>item.kind==='ability').map(item=>item.key));
+  getAbilities(hero.key).forEach(ability=>{
+   if(!existing.has(ability.key))hero.items.push({kind:'ability',key:ability.key,name:ability.name,baseCd:ability.cd,levels:ability.levels,ult:ability.ult,started:0,duration:0});
+  });
+  hero.loaded=true;hero.abilityDataPatch=state.data.patch;save();
+ }
+}
+function addHero(key){
+ const existing=state.team.findIndex(hero=>hero.key===key);
+ if(existing>=0){state.selected=existing;save();closeDrawer();render();return}
+ if(state.team.length>=5){toast('Your lineup is full');return}
+ snap();state.team.push({key,items:[],inventory:Array(6).fill(null),cdr:0,loaded:false,abilityDataPatch:''});state.selected=state.team.length-1;save();closeDrawer();render();
+}
+function removeHero(index){if(index<0||index>=state.team.length)return;snap();state.team.splice(index,1);if(index<state.selected)state.selected--;else if(index===state.selected)state.selected=Math.min(index,state.team.length-1);state.selected=Math.max(0,state.selected);save();render()}
+function renderRoster(){
+ const box=$('roster');box.innerHTML='';
+ for(let i=0;i<5;i++){
+  const hero=state.team[i],button=el('button','slot '+(hero?'':'empty')+(i===state.selected&&hero?' active':''));
+  if(hero){
+   button.append(img(CDN+'heroes/'+hero.key+'.png',name(hero.key)),el('span','hero-name',name(hero.key)));
+   const close=el('span','x','×');close.title='Remove '+name(hero.key);close.setAttribute('role','button');close.tabIndex=0;close.setAttribute('aria-label','Remove '+name(hero.key));
+   const remove=e=>{e.stopPropagation();removeHero(i)};close.addEventListener('click',remove);close.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();remove(e)}});button.append(close);
+  }else button.innerHTML='<span class="plus">+</span><span class="small">Add hero</span>';
+  button.onclick=()=>hero?(state.selected=i,save(),render()):openHeroPicker();box.append(button);
+ }
+ $('teamCount').textContent=state.team.length+'/5';$('tracked').textContent=state.team.length;
+}
+function isShardAbility(hero,item){return hero.key==='bristleback'&&(normalizeName(item.key).includes('hairball')||normalizeName(item.name)==='hairball')}
+function isUltimateAbility(hero,item){return item.kind==='ability'&&!isShardAbility(hero,item)&&ULTIMATE_NAMES.has(normalizeName(item.name))}
+function cooldownRemaining(item){return item.started?finiteNumber(item.duration,item.baseCd)-(now()-item.started)/1000:0}
+function ensureInventoryCooldowns(hero){
+ if(!Array.isArray(hero.inventoryCooldowns))hero.inventoryCooldowns=[];
+ hero.inventoryCooldowns=Array.from({length:6},(_,i)=>{const c=hero.inventoryCooldowns[i];return c&&typeof c==='object'?c:{baseCd:0,started:0,duration:0}});
+ if(!Array.isArray(hero.inventoryCustom))hero.inventoryCustom=[];
+ hero.inventoryCustom=Array.from({length:6},(_,i)=>hero.inventoryCustom[i]&&typeof hero.inventoryCustom[i]==='object'?hero.inventoryCustom[i]:null);
+}
+function toggleInventoryCooldown(hero,index){
+ ensureInventory(hero);ensureInventoryCooldowns(hero);
+ const key=hero.inventory[index],custom=hero.inventoryCustom?.[index],data=custom?{name:custom.name,cd:custom.baseCd}:key&&state.data.items?.[key],cd=hero.inventoryCooldowns[index];
+ if(!key){openInventory(hero,index);return}
+ if(!data||!(Number(data.cd)>0)){toast('Set a cooldown for this item before tracking it.');return}
+ snap();
+ if(cd.started){cd.started=0;cd.duration=0;toast((data.name||key)+' cooldown reset')}
+ else{cd.baseCd=Number(data.cd);cd.started=now();cd.duration=Math.max(.1,cd.baseCd*(1-(hero.cdr||0)/100));state.history.unshift({hero:name(hero.key),spell:(data.name||key)+' (inventory)',time:new Date().toLocaleTimeString(),game:fmt(clockNow())});state.history=state.history.slice(0,100);toast((data.name||key)+' cooldown started')}
+ save();render();
+}
+function startCooldown(hero,item){snap();if(item.started){item.started=0;item.duration=0}else{item.started=now();item.duration=Math.max(.1,item.baseCd*(1-(hero.cdr||0)/100));state.history.unshift({hero:name(hero.key),spell:item.name,time:new Date().toLocaleTimeString(),game:fmt(clockNow())});state.history=state.history.slice(0,100)}save();render()}
+function cdTile(hero,item,index){
+ const tile=el('div','cd '+(item.started?'cooling':'ready'));tile.dataset.itemIndex=String(index);
+ const top=el('div','cdtop');top.append(img(CDN+(item.kind==='item'?'items/':'abilities/')+item.key+'.png',item.name));
+ const shard=isShardAbility(hero,item),ultimate=isUltimateAbility(hero,item);
+ top.append(el('span','tag '+(item.kind==='item'?'item':ultimate?'ult':''),item.kind==='item'?'ITEM':shard?'SHARD':ultimate?'ULT':'SPELL'));
+ tile.append(top,el('div','cdname',item.name));
+ const remaining=cooldownRemaining(item);tile.append(el('div',item.started?'count':'readytxt',item.started?fmt(remaining):'READY'));
+ const foot=el('div','cdfoot'),use=el('button','',item.started?'Reset':'Used');use.onclick=()=>startCooldown(hero,item);foot.append(use);
+ const edit=el('button','mini','Edit');edit.onclick=()=>{const value=prompt('Cooldown in seconds',String(item.baseCd));if(value!==null){const next=Number(value);if(Number.isFinite(next)&&next>0){snap();item.baseCd=next;if(item.started)item.duration=next*(1-(hero.cdr||0)/100);save();render()}else toast('Enter a cooldown greater than zero.')}};foot.append(edit);
+ const del=el('button','mini','×');del.title='Remove tracked cooldown';del.onclick=()=>{snap();hero.items.splice(index,1);save();render()};foot.append(del);tile.append(foot);return tile;
+}
+function isWatchThreat(hero,item){
+ if(isUltimateAbility(hero,item))return true;
+ return item.kind==='item'&&DEFENSIVE_ITEMS.has(item.key);
+}
+function renderHero(){
+ const panel=$('heroPanel');panel.innerHTML='';
+ const hero=state.team[state.selected];
+ if(!hero){panel.append(el('div','muted','Select an enemy hero to start tracking.'));return}
+ initializeHeroAbilities(hero);ensureInventory(hero);
+ const head=el('div','herohead');head.append(img(CDN+'heroes/'+hero.key+'.png',name(hero.key)));
+ const heading=el('div');heading.append(el('h2','',name(hero.key)),el('div','sub','Enemy hero · Slot '+(state.selected+1)));head.append(heading);
+ const actions=el('div','heroactions'),cdr=el('button','quiet','CDR '+(hero.cdr||0)+'%');
+ cdr.onclick=()=>{const value=prompt('Manual cooldown reduction %',String(hero.cdr||0));if(value!==null){const next=Number(value);if(Number.isFinite(next)){snap();hero.cdr=Math.max(0,Math.min(80,next));save();render()}else toast('Enter a valid percentage.')}};actions.append(cdr);
+ const remove=el('button','quiet','Remove');remove.onclick=()=>removeHero(state.selected);actions.append(remove);head.append(actions);panel.append(head);
+ const section=el('div','section'),title=el('div','sectiontitle');title.append(el('h3','','Tracked cooldowns'),el('span','small muted',hero.items.length+' tracked'));section.append(title);
+ const grid=el('div','cooldowns');hero.items.forEach((item,index)=>grid.append(cdTile(hero,item,index)));if(!hero.items.length)grid.append(el('div','muted small','No cooldowns tracked yet.'));section.append(grid);panel.append(section);
+ const add=el('div','toolbar'),addButton=el('button','primary','＋ Add cooldown');addButton.onclick=()=>openItemPicker(hero);
+ const inventoryButton=el('button','quiet','Inventory');inventoryButton.onclick=()=>openInventory(hero);add.append(addButton,inventoryButton);panel.append(add);
+ const inventorySection=el('div','section'),inventoryTitle=el('h3','','Enemy inventory');inventoryTitle.style.cssText='font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#aebdcb;margin-bottom:9px';inventorySection.append(inventoryTitle);
+ const slots=el('div','inventory');ensureInventoryCooldowns(hero);hero.inventory.forEach((key,index)=>{const slot=el('button','inv '+(key&&hero.inventoryCooldowns[index].started?'cooling':''));slot.dataset.inventorySlot=String(index);if(key){const custom=hero.inventoryCustom[index];if(custom)slot.append(el('span','custom-item-icon',custom.name.split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase()));else slot.append(img(CDN+'items/'+key+'.png',state.data.items?.[key]?.name||key));const cd=hero.inventoryCooldowns[index],overlay=el('span','inv-cooldown',cd.started?fmt(cooldownRemaining(cd)):'READY');slot.append(overlay);slot.title=(custom?.name||state.data.items?.[key]?.name||key)+' · tap to start/reset cooldown';slot.onclick=()=>toggleInventoryCooldown(hero,index)}else{slot.textContent='＋';slot.title='Add item to inventory slot '+(index+1);slot.onclick=()=>openInventory(hero,index)}slots.append(slot)});inventorySection.append(slots);panel.append(inventorySection);
+}
+function renderWatch(){
+ const watch=$('watchlist');watch.innerHTML='';const threats=[];
+ state.team.forEach((hero,heroIndex)=>hero.items.forEach((item,itemIndex)=>{if(isWatchThreat(hero,item))threats.push({hero,heroIndex,item,itemIndex})}));
+ threats.forEach(({hero,heroIndex,item,itemIndex})=>{
+  const card=el('div','cd '+(item.started?'cooling':'ready'));card.dataset.heroIndex=String(heroIndex);card.dataset.itemIndex=String(itemIndex);
+  card.append(el('div','cdname',name(hero.key)),el('div','small muted',item.name),el('div',item.started?'count':'readytxt',item.started?fmt(cooldownRemaining(item)):'READY'));
+  card.onclick=()=>{state.selected=heroIndex;startCooldown(hero,item)};watch.append(card);
+ });
+ // Warpath is Bristleback's passive ultimate: show it as information, never as a fake cooldown.
+ state.team.forEach((hero,heroIndex)=>{
+  if(hero.key!=='bristleback')return;
+  const alreadyTracked=hero.items.some(item=>item.kind==='ability'&&normalizeName(item.name)==='warpath');
+  if(alreadyTracked)return;
+  const card=el('div','cd passiveult');
+  card.append(el('div','cdname',name(hero.key)),el('div','small muted','Warpath · PASSIVE ULTIMATE'),el('div','readytxt','NO COOLDOWN'));
+  card.title='Warpath is passive and has no cooldown to track.';
+  card.onclick=()=>{state.selected=heroIndex;render()};
+  watch.append(card);
+ });
+ if(!watch.children.length)watch.append(el('div','muted small','No ultimate cooldowns or key defensive items tracked yet.'));
+}
+function updateWatchTimers(){
+ document.querySelectorAll('#watchlist .cd').forEach(card=>{
+  const hero=state.team[Number(card.dataset.heroIndex)],item=hero?.items[Number(card.dataset.itemIndex)];if(!item)return;
+  const cooling=!!item.started;card.classList.toggle('cooling',cooling);card.classList.toggle('ready',!cooling);
+  const counter=card.querySelector('.count,.readytxt');if(counter){counter.className=cooling?'count':'readytxt';counter.textContent=cooling?fmt(cooldownRemaining(item)):'READY'}
+ });
+}
+function renderHistory(){const list=$('history');list.innerHTML='';if(!state.history.length){list.append(el('div','event','No cooldown events recorded yet.'));return}state.history.slice(0,25).forEach(event=>list.append(el('div','event',(event.time||'')+' · '+(event.game||'')+' · '+(event.hero||'')+' used '+(event.spell||''))))}
+function render(){state.selected=Math.max(0,Math.min(state.selected,Math.max(0,state.team.length-1)));renderRoster();renderHero();renderWatch();renderHistory();$('cooling').textContent=state.team.reduce((count,hero)=>count+hero.items.filter(item=>item.started).length,0);$('sound').textContent='Sound '+(state.sound?'on':'off')}
+function openDrawer(title,content){$('dialogTitle').textContent=title;$('dialogBody').innerHTML='';$('dialogBody').append(content);$('drawer').classList.add('open')}
+function closeDrawer(){$('drawer').classList.remove('open')}
+$('close').onclick=closeDrawer;$('drawer').onclick=event=>{if(event.target===$('drawer'))closeDrawer()};
+function openHeroPicker(){
+ const wrapper=el('div'),search=el('input'),grid=el('div','searchgrid');search.placeholder='Search hero…';search.style.width='100%';
+ function fill(){const query=search.value.trim().toLowerCase();grid.innerHTML='';heroKeys().filter(key=>name(key).toLowerCase().includes(query)||key.includes(query)).forEach(key=>{const button=el('button','pick');button.append(img(CDN+'heroes/'+key+'.png',name(key)),el('span','',name(key)));button.onclick=()=>addHero(key);grid.append(button)});if(!grid.children.length)grid.append(el('div','muted small','No matching heroes.'))}
+ search.oninput=fill;wrapper.append(search,grid);fill();openDrawer('Choose enemy hero',wrapper);
+}
+function openItemPicker(hero){
+ if(!state.data.loaded){toast('Game data is still loading. Try again in a moment.');return}
+ const wrapper=el('div'),search=el('input'),grid=el('div','searchgrid');search.placeholder='Search item or ability…';search.style.width='100%';
+ function fill(){
+  grid.innerHTML='';const query=search.value.trim().toLowerCase();
+  const abilities=getAbilities(hero.key).filter(ability=>!hero.items.some(item=>item.kind==='ability'&&item.key===ability.key)&&(`${ability.key} ${ability.name}`).toLowerCase().includes(query));
+  abilities.forEach(ability=>{const button=el('button','pick');button.append(img(CDN+'abilities/'+ability.key+'.png',ability.name),el('span','',ability.name+' · '+ability.cd+'s'));button.onclick=()=>{snap();hero.items.push({kind:'ability',key:ability.key,name:ability.name,baseCd:ability.cd,levels:ability.levels,ult:ability.ult,started:0,duration:0});save();closeDrawer();render()};grid.append(button)});
+  Object.entries(state.data.items||{}).filter(([key,item])=>(key+' '+item.name).toLowerCase().includes(query)).slice(0,80).forEach(([key,item])=>{const button=el('button','pick');button.append(img(CDN+'items/'+key+'.png',item.name),el('span','',item.name+' · '+item.cd+'s'));button.onclick=()=>{snap();hero.items.push({kind:'item',key,name:item.name,baseCd:item.cd,started:0,duration:0});save();closeDrawer();render()};grid.append(button)});
+  if(!grid.children.length)grid.append(el('div','muted small','No matching cooldowns found.'));
+ }
+ search.oninput=fill;wrapper.append(search,grid);fill();openDrawer('Add a cooldown',wrapper);
+}
+function openInventory(hero,initialSlot=0){
+ if(!state.data.loaded){toast('Game data is still loading. Try again in a moment.');return}
+ ensureInventory(hero);ensureInventoryCooldowns(hero);let selected=Math.max(0,Math.min(5,Number(initialSlot)||0));
+ const wrapper=el('div'),note=el('p','note','Choose a slot and tap a standard item, or add a custom item with your own name and cooldown. Tap a filled inventory slot on the main screen to start or reset its cooldown.'),slots=el('div','inventory'),search=el('input'),grid=el('div','searchgrid'),customButton=el('button','primary','＋ Add custom inventory item');
+ search.placeholder='Search items — e.g. Black King Bar, Orchid, Blink';search.style.width='100%';
+ function drawSlots(){slots.innerHTML='';for(let index=0;index<6;index++){const button=el('button','inv '+(index===selected?'active':''));const key=hero.inventory[index],custom=hero.inventoryCustom[index];if(key){if(custom)button.append(el('span','custom-item-icon',custom.name.split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase()));else button.append(img(CDN+'items/'+key+'.png',state.data.items?.[key]?.name||key))}else button.textContent='＋';button.title='Inventory slot '+(index+1);button.onclick=()=>{selected=index;drawSlots();fill()};slots.append(button)}}
+ customButton.onclick=()=>{
+  const itemName=prompt('Custom item name (for example: Refresher Orb upgrade)');
+  if(itemName===null)return;
+  const cleanName=itemName.trim().slice(0,60);if(!cleanName){toast('Enter an item name.');return}
+  const cdInput=prompt('Cooldown in seconds. Enter 0 if it has no cooldown.','');if(cdInput===null)return;
+  const cd=Number(cdInput);if(!Number.isFinite(cd)||cd<0||cd>3600){toast('Enter a cooldown between 0 and 3600 seconds.');return}
+  snap();hero.inventory[selected]='custom_item';hero.inventoryCustom[selected]={name:cleanName,baseCd:cd};hero.inventoryCooldowns[selected]={baseCd:cd,started:0,duration:0};
+  save();drawSlots();renderHero();toast(cleanName+' added to inventory slot '+(selected+1));
+ };
+ function fill(){grid.innerHTML='';const query=search.value.trim().toLowerCase();const entries=Object.entries(state.data.items||{}).filter(([key,item])=>(key+' '+(item.name||'')).toLowerCase().includes(query)).sort((a,b)=>(a[1].name||a[0]).localeCompare(b[1].name||b[0])).slice(0,140);entries.forEach(([key,item])=>{const button=el('button','pick');button.append(img(CDN+'items/'+key+'.png',item.name),el('span','',item.name),el('span','small muted',Number(item.cd)>0?'Cooldown: '+item.cd+'s':'No cooldown data'));button.onclick=()=>{snap();ensureInventory(hero);ensureInventoryCooldowns(hero);hero.inventory[selected]=key;hero.inventoryCustom[selected]=null;hero.inventoryCooldowns[selected]={baseCd:Math.max(0,Number(item.cd)||0),started:0,duration:0};save();drawSlots();renderHero();toast(item.name+' placed in inventory slot '+(selected+1))};grid.append(button)});if(!entries.length)grid.append(el('div','muted small','No matching items.'))}
+ const clear=el('button','quiet','Clear selected slot');clear.onclick=()=>{snap();hero.inventory[selected]=null;hero.inventoryCustom[selected]=null;hero.inventoryCooldowns[selected]={baseCd:0,started:0,duration:0};save();drawSlots();renderHero();toast('Inventory slot '+(selected+1)+' cleared')};
+ search.oninput=fill;wrapper.append(note,slots,customButton,clear,search,grid);drawSlots();fill();openDrawer('Enemy inventory · searchable',wrapper);
+}
+function openPresets(){
+ const wrapper=el('div'),input=el('input');input.placeholder='Preset name';input.style.width='100%';
+ const saveButton=el('button','primary','Save current lineup');saveButton.onclick=()=>{const key=input.value.trim();if(!key){toast('Enter a preset name');return}snap();state.presets[key]=JSON.parse(JSON.stringify(state.team));save();toast('Preset saved');closeDrawer()};wrapper.append(input,saveButton);
+ Object.keys(state.presets).sort().forEach(key=>{const row=el('div','toolbar'),loadButton=el('button','quiet',key),deleteButton=el('button','mini','Delete');loadButton.onclick=()=>{const team=Array.isArray(state.presets[key])?state.presets[key].map(sanitizeHero).filter(Boolean).slice(0,5):[];snap();state.team=team;state.selected=0;save();closeDrawer();render()};deleteButton.onclick=()=>{snap();delete state.presets[key];save();openPresets()};row.append(loadButton,deleteButton);wrapper.append(row)});
+ openDrawer('Lineup presets',wrapper);
+}
+$('browse').onclick=openHeroPicker;$('heroSearch').onkeydown=event=>{if(event.key==='Enter')openHeroPicker()};$('presets').onclick=openPresets;$('refresh').onclick=fetchData;
+$('export').onclick=()=>{
+ const backup={app:'Dota Tactical',version:2,patch:PATCH,exportedAt:new Date().toISOString(),team:state.team,selected:state.selected,history:state.history,presets:state.presets,clock:state.clock,rosh:state.rosh,tor:state.tor,aegis:state.aegis,sound:state.sound};
+ const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),anchor=el('a');anchor.href=url;anchor.download='dota-tactical-backup.json';document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+};
+function applyBackup(data){
+ if(!data||!Array.isArray(data.team))throw Error('This backup does not contain a valid team.');
+ state.team=data.team.map(sanitizeHero).filter(Boolean).slice(0,5);state.selected=Math.max(0,Math.min(finiteNumber(data.selected,0),Math.max(0,state.team.length-1)));
+ state.history=Array.isArray(data.history)?data.history.slice(0,100):[];state.presets=data.presets&&typeof data.presets==='object'?data.presets:{};
+ if(data.clock&&typeof data.clock==='object')state.clock={elapsed:Math.max(0,finiteNumber(data.clock.elapsed,0)),running:!!data.clock.running,stamp:Math.max(0,finiteNumber(data.clock.stamp,0))};
+ state.rosh=Math.max(0,finiteNumber(data.rosh,0));state.tor=Math.max(0,finiteNumber(data.tor,0));state.aegis=Math.max(0,finiteNumber(data.aegis,0));state.sound=!!data.sound;
+ save();render();clockTick();
+}
+$('settings').onclick=()=>{
+ const wrapper=el('div'),info=el('p','note','Cooldown values are loaded from OpenDota constants, whose patch label may omit letter-patch suffixes. Ability cooldowns start with the first listed rank; use Edit when you know the enemy ability level. Ultimate labels use the 7.41f ability catalogue. Timers are manual and this page does not read live match data. Objective timers assume a normal (non-Turbo) match.'),importButton=el('button','quiet','Import backup (.json)'),file=el('input');
+ file.type='file';file.accept='.json,application/json';file.style.display='none';importButton.onclick=()=>file.click();file.onchange=()=>{const selectedFile=file.files?.[0];if(!selectedFile)return;const reader=new FileReader();reader.onerror=()=>toast('Could not read that backup file.');reader.onload=()=>{try{const data=JSON.parse(String(reader.result||''));snap();applyBackup(data);closeDrawer();toast('Backup imported')}catch(error){console.error(error);toast('Invalid backup file — nothing was changed.')}};reader.readAsText(selectedFile)};
+ wrapper.append(info,importButton,file);openDrawer('Settings',wrapper);
+};
+function clockNow(){return state.clock.elapsed+(state.clock.running&&state.clock.stamp?(now()-state.clock.stamp)/1000:0)}
+function clockTick(){
+ $('clock').textContent=fmt(clockNow());$('clockState').textContent=state.clock.running?'RUNNING':'PAUSED';
+ if(state.rosh){const elapsed=Math.max(0,(now()-state.rosh)/1000),earliest=480-elapsed,latest=660-elapsed;$('rosh').textContent=earliest>0?'Respawn in '+fmt(earliest)+'–'+fmt(latest):latest>0?'May be up · guaranteed in '+fmt(latest):'Roshan should be up'}else $('rosh').textContent='Not tracked';
+ if(state.aegis){const remaining=300-Math.max(0,(now()-state.aegis)/1000);$('aegis').textContent=remaining>0?'Aegis expires in '+fmt(remaining):'Aegis expired'}else $('aegis').textContent='Aegis pickup not tracked';
+ if(state.tor){const remaining=600-Math.max(0,(now()-state.tor)/1000);$('tor').textContent=remaining>0?'Respawn in '+fmt(remaining):'May be available'}else{const untilFirst=1200-clockNow();$('tor').textContent=untilFirst>0?'First spawn in '+fmt(untilFirst):'First spawn time passed · kill not recorded'}
+ $('torDetail').textContent=state.tor?'10-minute timer from the last recorded kill':'First Tormentor spawns at 20:00';
+}
+$('toggleClock').onclick=()=>{snap();if(state.clock.running){state.clock.elapsed=clockNow();state.clock.running=false;state.clock.stamp=0}else{state.clock.running=true;state.clock.stamp=now()}save();clockTick()};
+$('resetClock').onclick=()=>{snap();state.clock={elapsed:0,running:false,stamp:0};save();clockTick()};
+$('applyClock').onclick=()=>{const minutes=Number($('setClock').value);if(!Number.isFinite(minutes)||minutes<0){toast('Enter a valid match time in minutes.');return}snap();state.clock={elapsed:minutes*60,running:false,stamp:0};save();clockTick()};
+$('roshKill').onclick=()=>{snap();state.rosh=now();save();clockTick();toast('Roshan kill recorded')};
+$('roshReset').onclick=()=>{snap();state.rosh=0;save();clockTick()};
+$('aegisPicked').onclick=()=>{snap();state.aegis=now();save();clockTick();toast('Aegis pickup recorded')};
+$('aegisReset').onclick=()=>{snap();state.aegis=0;save();clockTick()};
+$('torKill').onclick=()=>{snap();state.tor=now();save();clockTick();toast('Tormentor kill recorded')};
+$('torReset').onclick=()=>{snap();state.tor=0;save();clockTick()};
+$('undo').onclick=()=>{const raw=state.undo.pop();if(!raw){toast('Nothing to undo');return}try{restoreSnapshot(JSON.parse(raw));save();render();clockTick();toast('Undone')}catch(error){console.error(error);toast('Could not undo that action.')}};
+let audioContext=null;
+function playBeep(){try{const AudioContextClass=window.AudioContext||window.webkitAudioContext;if(!AudioContextClass)return;audioContext=audioContext||new AudioContextClass();if(audioContext.state==='suspended')audioContext.resume();const oscillator=audioContext.createOscillator(),gain=audioContext.createGain();oscillator.type='sine';oscillator.frequency.value=880;gain.gain.setValueAtTime(.0001,audioContext.currentTime);gain.gain.exponentialRampToValueAtTime(.12,audioContext.currentTime+.02);gain.gain.exponentialRampToValueAtTime(.0001,audioContext.currentTime+.24);oscillator.connect(gain);gain.connect(audioContext.destination);oscillator.start();oscillator.stop(audioContext.currentTime+.25)}catch(error){console.warn('Sound unavailable',error)}}
+$('sound').onclick=()=>{snap();state.sound=!state.sound;save();$('sound').textContent='Sound '+(state.sound?'on':'off');if(state.sound)playBeep()};
+$('toggleHistory').onclick=()=>{$('historyPanel').classList.toggle('hidden');$('toggleHistory').textContent=$('historyPanel').classList.contains('hidden')?'History':'Hide history'};
+$('clearHistory').onclick=()=>{snap();state.history=[];save();renderHistory();toast('History cleared')};
+document.addEventListener('keydown',event=>{
+ if(event.key==='Escape'){closeDrawer();return}
+ if($('drawer').classList.contains('open')||event.target.matches('input,select,textarea'))return;
+ if(event.code==='Space'){event.preventDefault();$('toggleClock').click()}
+ if(event.key.toLowerCase()==='u')$('undo').click();
+ if('12345'.includes(event.key)&&state.team[Number(event.key)-1]){state.selected=Number(event.key)-1;save();render()}
+});
+function tick(){
+ clockTick();let expired=false;
+ state.team.forEach(hero=>hero.items.forEach(item=>{if(item.started&&cooldownRemaining(item)<=0){item.started=0;item.duration=0;expired=true}}));
+ if(expired){save();render();if(state.sound)playBeep();return}
+ const hero=state.team[state.selected];if(hero){document.querySelectorAll('#heroPanel .cd[data-item-index]').forEach(card=>{const item=hero.items[Number(card.dataset.itemIndex)];if(!item)return;const counter=card.querySelector('.count,.readytxt');if(counter&&item.started)counter.textContent=fmt(cooldownRemaining(item))})}
+ updateWatchTimers();
+ const activeHero=state.team[state.selected];if(activeHero){document.querySelectorAll('#heroPanel [data-inventory-slot]').forEach(slot=>{const index=Number(slot.dataset.inventorySlot),cd=activeHero.inventoryCooldowns?.[index];const label=slot.querySelector('.inv-cooldown');if(label&&cd)label.textContent=cd.started?fmt(cooldownRemaining(cd)):'READY';if(cd?.started&&cooldownRemaining(cd)<=0){cd.started=0;cd.duration=0;save();slot.classList.remove('cooling');if(label)label.textContent='READY';if(state.sound)playBeep()}})}
+}
+$('sound').textContent='Sound '+(state.sound?'on':'off');
+render();clockTick();setInterval(tick,400);fetchData();
+})();
+
+</script></body></html>
